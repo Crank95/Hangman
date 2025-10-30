@@ -1,9 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Newtonsoft.Json;
-
-namespace Hangman
+﻿namespace Hangman
 {
     class Program
     {
@@ -15,7 +10,7 @@ namespace Hangman
             {
                 config = Config.LoadFromJson();
             }
-            catch(FileNotFoundException ex)
+            catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 Console.ReadKey();
@@ -56,6 +51,8 @@ namespace Hangman
 
         static void StartGame()
         {
+            try
+            {
             if (config == null)
                 return;
 
@@ -64,6 +61,11 @@ namespace Hangman
                 int index = random.Next(0, words.Count);
                 string selectedWord = words[index].ToLower();
                 GameLoop(selectedWord);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         static void GameLoop(string word)

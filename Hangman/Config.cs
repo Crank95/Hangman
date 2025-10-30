@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.Tracing;
+using System.Text.Json;
 
 namespace Hangman
 {
@@ -18,7 +19,7 @@ namespace Hangman
             Config? config = JsonSerializer.Deserialize<Config>(json);
 
             if (config == null || config.Words == null || config.Words.Count == 0)
-                throw new Exception("Keine Wörter in der Konfigurationsdatei gefunden.");
+                throw new Exception($" Die words.json darf nicht leer sein.");
 
             return config;
         }
