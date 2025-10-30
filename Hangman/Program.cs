@@ -7,9 +7,21 @@ namespace Hangman
 {
     class Program
     {
-        public static Config config = Config.LoadFromJson();
+
+        public static Config? config;
         static void Main()
         {
+            try
+            {
+                config = Config.LoadFromJson();
+            }
+            catch(FileNotFoundException ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.ReadKey();
+                return;
+            }
+
             MainMenue();
         }
 
@@ -44,12 +56,14 @@ namespace Hangman
 
         static void StartGame()
         {
-            List<string> words = config.words;
-            Random random = new ();
-            int index = random.Next(0, words.Count);
-            string selectedWord = words[index].ToLower();
+            if (config == null)
+                return;
 
-            GameLoop(selectedWord);
+                List<string> words = config.Words;
+                Random random = new();
+                int index = random.Next(0, words.Count);
+                string selectedWord = words[index].ToLower();
+                GameLoop(selectedWord);
         }
 
         static void GameLoop(string word)

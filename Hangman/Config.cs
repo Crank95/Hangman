@@ -5,7 +5,7 @@ namespace Hangman
 
     public class Config
     {
-        public List<string> words { get; set; }
+        public required List<string> Words { get; set; }
 
         public static Config LoadFromJson(string path = "words.json")
         {
@@ -15,9 +15,9 @@ namespace Hangman
             }
 
             string json = File.ReadAllText(path);
-            Config config = JsonSerializer.Deserialize<Config>(json);
+            Config? config = JsonSerializer.Deserialize<Config>(json);
 
-            if (config == null || config.words == null || config.words.Count == 0)
+            if (config == null || config.Words == null || config.Words.Count == 0)
                 throw new Exception("Keine Wörter in der Konfigurationsdatei gefunden.");
 
             return config;
