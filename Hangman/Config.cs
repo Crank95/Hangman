@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
 namespace Hangman
 {
@@ -13,8 +8,8 @@ namespace Hangman
         public List<string> words { get; set; }
 
         public static Config LoadFromJson(string path = "words.json")
-        { 
-            if(!File.Exists(path))
+        {
+            if (!File.Exists(path))
             {
                 throw new FileNotFoundException($"Die Datei {path} wurde nicht gefunden.");
             }

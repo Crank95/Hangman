@@ -42,7 +42,7 @@ namespace Hangman
         static void StartGame()
         {
             List<string> words = config.words;
-            Random random = new Random();
+            Random random = new ();
             int index = random.Next(0, words.Count);
             string selectedWord = words[index].ToLower();
 
@@ -76,8 +76,17 @@ namespace Hangman
 
                 Console.WriteLine();
                 Console.Write("Buchstabe: ");
-                char character = Convert.ToChar(Console.ReadLine().ToLower());
-
+                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+                char character = char.ToLowerInvariant(keyInfo.KeyChar);
+                while (!char.IsLetter(character))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("\nBitte einen gültigen Buchstaben drücken: ");
+                    keyInfo = Console.ReadKey();
+                    character = char.ToLowerInvariant(keyInfo.KeyChar);
+                    Console.ResetColor();
+                }
+                Console.WriteLine(character);
                 bool foundCharInWord = false;
                 for (int i = 0; i < word.Length; i++)
                 { 
