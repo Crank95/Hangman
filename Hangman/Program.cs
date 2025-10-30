@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 
 namespace Hangman
@@ -17,16 +19,17 @@ namespace Hangman
             {
                 Headline();
 
-                int action = Convert.ToInt32(Console.ReadLine());
+                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+                char actionChar = keyInfo.KeyChar;
                 bool end = false;
 
-                switch (action)
+                switch (actionChar)
                 {
-                    case 1:
+                    case '1':
                         StartGame();
                         break;
 
-                    case 2:
+                    case '2':
                         end = true;
                         break;
                 }
@@ -47,104 +50,33 @@ namespace Hangman
             string selectedWord = words[index].ToLower();
 
             GameLoop(selectedWord);
-
-
-
         }
 
         static void GameLoop(string word)
         {
             int lives = 10;
-            string hiddenWord = "";
-
-            for(int i = 0; i < word.Length; i++)
-            {
-                hiddenWord += "_";
-            }
+            string hiddenWord = CreateHiddenWord(word.Length);
 
             while (true)
             {
-                Console.Clear();
-                Console.WriteLine("Gesuchtes Word: " + hiddenWord);
-                Console.Write("Noch übrige Verusche: ");
-                for (int i = 0; i < lives; i++)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("X");
-                    Console.ResetColor();
-                }
+                DisplayGameState(hiddenWord, lives);
 
-                Console.WriteLine();
-                Console.Write("Buchstabe: ");
-                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-                char character = char.ToLowerInvariant(keyInfo.KeyChar);
-                while (!char.IsLetter(character))
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("\nBitte einen gültigen Buchstaben drücken: ");
-                    keyInfo = Console.ReadKey();
-                    character = char.ToLowerInvariant(keyInfo.KeyChar);
-                    Console.ResetColor();
-                }
-                Console.WriteLine(character);
-                bool foundCharInWord = false;
-                for (int i = 0; i < word.Length; i++)
-                { 
-                    if (word[i] == character)
-                    {
-                        foundCharInWord = true;
-                        break;
-                    }
-                } 
+                char character = GetValidInput();
 
-                string tempHiddenWord = hiddenWord;
-                hiddenWord = "";
+                bool foundCharInWord = word.Contains(character);
 
                 if(foundCharInWord)
                 {
-                    for(int i = 0; i < word.Length; i++)
-                    {
-                        if (word[i] == character)
-                        {
-                            hiddenWord += character;
-                        }
-                        else if (tempHiddenWord[i] != '_')
-                        {
-                            hiddenWord += tempHiddenWord[i];
-                        }
-                        else
-                        {
-                            hiddenWord += '_';
-                        }
-                    }
-
-                    if(hiddenWord == word)
-                    {
-                        Console.Clear();
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("GEWONNEN!!!!");
-                        Console.WriteLine($"Das Wort war: {word}");
-                        Console.ResetColor();
-                        break;
-                    }
+                    hiddenWord = UpdateHiddenWord(word, hiddenWord, character);
                 }
                 else
                 {
-                    hiddenWord = tempHiddenWord;
-                    if(lives > 0)
-                    {
-                        lives -= 1;
-                    }
-                    else
-                    {
-                        Console.Clear();
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("GAME OVER!!!");
-                        Console.WriteLine($"Das gesuchte Word war: {word}");
-                        Console.ReadKey();
-                        Console.ResetColor();
-                        break;
-                    }
+                    lives--;
+                }
+
+                if(CheckGameEnd(word, hiddenWord, lives))
+                {
+                    break;
                 }
             }
         }
@@ -168,5 +100,86 @@ namespace Hangman
             Console.Write("Aktion: ");
         }
 
+        static string CreateHiddenWord(int length)
+        {
+            string hidden = "";
+            for (int i = 0; i < length; i++)
+            {
+                hidden += "_";
+            }
+            return hidden;
+        }
+
+        static void DisplayGameState(string hiddenWord, int lives)
+        {
+            Console.Clear();
+            Console.WriteLine($"Gesuchtes Wort: {hiddenWord}");
+            Console.Write("Noch übrige Versuche: ");
+            for (int i = 0; i < lives; i++)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("X");
+                Console.ResetColor();
+            }
+            Console.WriteLine();
+        }
+
+        static char GetValidInput()
+        {
+            Console.Write("Buchstabe: ");
+            ConsoleKeyInfo keyInfo = Console.ReadKey();
+            char character = char.ToLowerInvariant(keyInfo.KeyChar);
+
+            while(!char.IsLetter(character))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("\nBitte einen gültigen Buchstaben drücken: ");
+                keyInfo = Console.ReadKey();
+                character = char.ToLowerInvariant(keyInfo.KeyChar);
+                Console.ResetColor();
+            }
+            Console.WriteLine($"{character}");
+            return character;
+        }
+
+        static string UpdateHiddenWord(string word, string currentHidden, char character)
+        {
+            char[] hiddenChars = currentHidden.ToCharArray();
+            for (int i = 0; i < word.Length; i++)
+            {
+                if (word[i] == character)
+                {
+                    hiddenChars[i] = character;
+                }
+            }
+            return new string(hiddenChars);
+        }
+
+        static bool CheckGameEnd(string word, string hiddenWord, int lives)
+        {
+            if (hiddenWord == word)
+            {
+                Console.Clear();
+                Console.Write($"Gesuchtes Word: {hiddenWord}");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("GEWONNEN!!!!");
+                Console.WriteLine($"Das Wort war: {word}");
+                Console.ResetColor();
+                Console.ReadKey();
+                return true;
+            }
+
+            if (lives <= 0)
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("GAME OVER!!!");
+                Console.WriteLine($"Das gesuchte Word war: {word}");
+                Console.ReadKey();
+                Console.ResetColor();
+                return true;
+            }
+            return false;
+        }
     }
 }
